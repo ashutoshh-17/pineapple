@@ -1,0 +1,59 @@
+import nltk
+from nltk.tokenize import sent_tokenize, word_tokenize
+from nltk.corpus import stopwords
+from nltk.stem import PorterStemmer, WordNetLemmatizer
+import re
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+
+nltk.download('punkt')
+nltk.download('stopwords')
+nltk.download('wordnet')
+nltk.download('averaged_perceptron_tagger')
+
+
+text = """India is a vast country with second highest population in the world.
+It has diverse cultures and festivals like Diwali, Holi, and Christmas.
+People celebrate unity in diversity with joy and harmony."""
+
+
+sentences = sent_tokenize(text)
+words = word_tokenize(text)
+print("Sentences:", sentences)
+print("Words:", words)
+
+
+pos_tags = nltk.pos_tag(words)
+print("POS Tags:", pos_tags)
+
+
+stop_words = set(stopwords.words('english'))
+filtered_words = [word for word in words if word.lower() not in stop_words and word.isalpha()]
+print("Filtered Words (No Stopwords):", filtered_words)
+
+
+stemmer = PorterStemmer()
+stemmed_words = [stemmer.stem(word) for word in filtered_words]
+print("Stemmed Words:", stemmed_words)
+
+
+lemmatizer = WordNetLemmatizer()
+processed_sentences = []
+for sentence in sentences:
+    clean_sentence = re.sub('[^a-zA-Z]', ' ', sentence)  # Remove non-alphabetic characters
+    clean_sentence = clean_sentence.lower()  # Lowercase
+    words_in_sentence = clean_sentence.split()
+    lemmatized_sentence = ' '.join([
+        lemmatizer.lemmatize(word) for word in words_in_sentence if word not in stop_words
+    ])
+    processed_sentences.append(lemmatized_sentence)
+print("Processed Corpus (Lemmatized and No Stopwords):", processed_sentences)
+
+
+tfidf_vectorizer = TfidfVectorizer()
+tfidf_matrix = tfidf_vectorizer.fit_transform(processed_sentences).toarray()
+
+print("\nTF-IDF Feature Names:")
+print(tfidf_vectorizer.get_feature_names_out())
+print("\nTF-IDF Matrix:")
+print(tfidf_matrix)

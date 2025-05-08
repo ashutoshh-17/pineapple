@@ -1,0 +1,43 @@
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+titanic = sns.load_dataset('titanic')
+
+titanic['fare'] = titanic['fare'].fillna(titanic['fare'].mean())  
+titanic['age'] = titanic['age'].dropna()
+
+plt.figure(figsize=(8, 6))
+sns.histplot(titanic['fare'], bins=30, kde=True)
+plt.title('Distribution of Ticket Fare')
+plt.xlabel('Fare')
+plt.ylabel('Frequency')
+plt.show()
+
+plt.figure(figsize=(8, 6))
+sns.boxplot(x='pclass', y='fare', data=titanic)
+plt.title('Fare Distribution by Passenger Class')
+plt.xlabel('Passenger Class')
+plt.ylabel('Fare')
+plt.show()
+
+plt.figure(figsize=(8, 6))
+sns.histplot(titanic['age'], bins=30, kde=True)
+plt.title('Distribution of Passenger Age')
+plt.xlabel('Age')
+plt.ylabel('Frequency')
+plt.show()
+
+plt.figure(figsize=(8, 6))
+sns.barplot(x='pclass', y='survived', data=titanic)
+plt.title('Survival Rate by Passenger Class')
+plt.xlabel('Passenger Class')
+plt.ylabel('Survival Rate')
+plt.show()
+
+plt.figure(figsize=(8, 6))
+sns.boxplot(x='survived', y='fare', data=titanic)
+plt.title('Fare Distribution by Survival Status')
+plt.xlabel('Survived')
+plt.ylabel('Fare')
+plt.show()
+

@@ -1,0 +1,47 @@
+import pandas as pd
+import numpy as np
+from sklearn import preprocessing
+
+data={
+    'Student_ID':[101,102,103,104,105,106],
+    'Name': ["Alice", "Bob", "John", "Doe", "James", "Bond"],
+    'Marks': [90,86,np.nan,95,200,82],
+    'Attendance': [56,48,98,np.nan,94,84],
+    'CGPA': [9.8,5.6,7.8,8.4,6.2,8.9],
+    'Age': [18,19,np.nan,20,18,18],
+    'Gender': ['Male', 'Female', 'Female', 'Male','Male',np.nan]
+}
+
+df= pd.DataFrame(data)
+
+df
+
+df.isnull().sum()
+
+df['Marks'].fillna(df['Marks'].median(), inplace=True)
+df['Attendance'].fillna(df['Attendance'].mean(), inplace=True)
+df['Age'].fillna(df['Age'].mode()[0], inplace= True)
+df['Gender'].fillna(df['Gender'].mode()[0], inplace= True)
+
+df.isnull().sum()
+
+def handle_outliers_iqr(column):
+    Q1= df[column].quantile(0.25)
+    Q3= df[column].quantile(0.75)
+    
+    IQR = Q3 - Q1
+    
+    lower = Q1 - 1.5*IQR
+    upper = Q3 + 1.5*IQR
+    
+    df[column]= np.where((df[column]< lower)| df[column] > upper, df[column].median(),df[column])
+    
+handle_outliers_iqr('Marks')
+handle_outliers_iqr('CGPA')
+
+df
+
+scaler = preprocessing.MinMaxScaler()
+df[['CGPA']] = scaler.fit_transform(df[['CGPA']])
+
+df

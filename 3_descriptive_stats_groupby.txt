@@ -1,0 +1,35 @@
+import pandas as pd
+
+data ={
+    'Age_Group': ['20-30','20-30','30-40','30-40','30-40','40-50','40-50','20-30','30-40','40-50'],
+    'Income': [30000, 35000, 40000, 40000, 30000, 50000, 50000, 45000, 35000, 38000],
+    'Education': ['Bachelor', 'Bachelor', 'Master', 'PhD', 'PhD', 'Bachelor', 'Master', 'Bachelor', 'PhD', 'Bachelor']
+}
+
+df= pd.DataFrame(data)
+
+df
+
+grouped_data= df.groupby('Age_Group')['Income'].agg(['mean', 'median', 'min', 'max', 'std'])
+grouped_data
+
+age_group_mapping={'20-30':1, '30-40': 2, '40-50': 3}
+df['age_group_numeric']= df['Age_Group'].map(age_group_mapping)
+
+df[['Age_Group','age_group_numeric']]
+
+df1=pd.read_csv('datasets/Iris.csv')
+
+df1.describe()
+
+df1[df1['Species'] == 'Iris-virginica'].describe()
+
+df1[df1['Species'] == 'Iris-setosa'].describe()
+
+df1[df1['Species'] == 'Iris-versicolor'].describe()
+
+df1.groupby('Species').mean(numeric_only=True)
+
+df1.groupby('Species').median(numeric_only=True)
+
+df1.groupby('Species').std(numeric_only='True')
