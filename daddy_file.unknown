@@ -1,0 +1,461 @@
+Daddy file:
+
+_______xxx______
+
+
+1_Data_wrangling:
+
+import pandas as pd
+import numpy as np
+from sklearn.preprocessing import MinMaxScaler, LabelEncoder
+
+df = pd.read_csv('datasets/Iris.csv')
+
+df.head()
+
+df.isnull().sum()
+
+df.describe(include='all')
+
+df.dtypes
+
+df.shape
+
+numeric_cols= df.select_dtypes(include=[np.number]).columns.tolist()
+categorical_cols=df.select_dtypes(include=['object','category']).columns.tolist()
+
+print(numeric_cols)
+
+print(categorical_cols)
+
+scaler= MinMaxScaler()
+df_scaled=df.copy()
+df_scaled[numeric_cols]=scaler.fit_transform(df[numeric_cols])
+
+df_scaled[numeric_cols].head()
+
+le= LabelEncoder()
+df_scaled['Species_label']= le.fit_transform(df_scaled['Species'])
+df_one_hot=pd.get_dummies(df_scaled['Species'],prefix='Species')
+df_final=pd.concat([df_scaled,df_one_hot], axis=1)
+
+df_final.head()
+
+________xxxx___________xxxx___________
+
+2_data_wrangling
+
+import pandas as pd
+import numpy as np
+from sklearn import preprocessing
+
+data={
+    'Student_ID':[101,102,103,104,105,106],
+    'Name': ["Alice", "Bob", "John", "Doe", "James", "Bond"],
+    'Marks': [90,86,np.nan,95,200,82],
+    'Attendance': [56,48,98,np.nan,94,84],
+    'CGPA': [9.8,5.6,7.8,8.4,6.2,8.9],
+    'Age': [18,19,np.nan,20,18,18],
+    'Gender': ['Male', 'Female', 'Female', 'Male','Male',np.nan]
+}
+
+df= pd.DataFrame(data)
+
+df
+
+df.isnull().sum()
+
+df['Marks'].fillna(df['Marks'].median(), inplace=True)
+df['Attendance'].fillna(df['Attendance'].mean(), inplace=True)
+df['Age'].fillna(df['Age'].mode()[0], inplace= True)
+df['Gender'].fillna(df['Gender'].mode()[0], inplace= True)
+
+df.isnull().sum()
+
+def handle_outliers_iqr(column):
+    Q1= df[column].quantile(0.25)
+    Q3= df[column].quantile(0.75)
+    
+    IQR = Q3 - Q1
+    
+    lower = Q1 - 1.5*IQR
+    upper = Q3 + 1.5*IQR
+    
+    df[column]= np.where((df[column]< lower)| df[column] > upper, df[column].median(),df[column])
+    
+handle_outliers_iqr('Marks')
+handle_outliers_iqr('CGPA')
+
+df
+
+scaler = preprocessing.MinMaxScaler()
+df[['CGPA']] = scaler.fit_transform(df[['CGPA']])
+
+df
+
+
+
+_______xxx________
+
+
+3_descriptive_stats_groupby
+
+    import pandas as pd
+
+data ={
+    'Age_Group': ['20-30','20-30','30-40','30-40','30-40','40-50','40-50','20-30','30-40','40-50'],
+    'Income': [30000, 35000, 40000, 40000, 30000, 50000, 50000, 45000, 35000, 38000],
+    'Education': ['Bachelor', 'Bachelor', 'Master', 'PhD', 'PhD', 'Bachelor', 'Master', 'Bachelor', 'PhD', 'Bachelor']
+}
+
+df= pd.DataFrame(data)
+
+df
+
+grouped_data= df.groupby('Age_Group')['Income'].agg(['mean', 'median', 'min', 'max', 'std'])
+grouped_data
+
+age_group_mapping={'20-30':1, '30-40': 2, '40-50': 3}
+df['age_group_numeric']= df['Age_Group'].map(age_group_mapping)
+
+df[['Age_Group','age_group_numeric']]
+
+df1=pd.read_csv('datasets/Iris.csv')
+
+df1.describe()
+
+df1[df1['Species'] == 'Iris-virginica'].describe()
+
+df1[df1['Species'] == 'Iris-setosa'].describe()
+
+df1[df1['Species'] == 'Iris-versicolor'].describe()
+
+df1.groupby('Species').mean(numeric_only=True)
+
+df1.groupby('Species').median(numeric_only=True)
+
+df1.groupby('Species').std(numeric_only='True')
+
+
+________xxx__________
+
+
+4_data_anal1
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, r2_score
+
+df = pd.read_csv("datasets/Boston.csv")
+
+df
+
+df.isnull().sum()
+
+target = df['medv']
+features = df.drop(columns=['medv'], axis=1)
+
+x_train, x_test, y_train, y_test = train_test_split(features, target, test_size=0.2, random_state=42)
+
+LR = LinearRegression()
+LR.fit(x_train, y_train)
+
+y_pred = LR.predict(x_test)
+y_train_pred = LR.predict(x_train)
+
+plt.figure(figsize=(8, 5))
+plt.scatter(y_test, y_pred, c='red', label='Test Data')
+plt.scatter(y_train, y_train_pred, c='blue', label='Train Data')
+plt.xlabel('Actual MEDV')
+plt.ylabel('Predicted MEDV')
+plt.title('Actual vs Predicted Home Prices')
+plt.legend()
+plt.grid(True)
+plt.tight_layout()
+plt.show()
+
+mse = mean_squared_error(y_test, y_pred)
+r2 = r2_score(y_test, y_pred)
+
+print(f"Mean Squared Error: {mse:.2f}")
+print(f"R-squared Score: {r2:.2f}")
+print(f"Accuracy is {r2*100:.2f}%")
+
+
+_______xxx_________
+
+
+5_data_anal2
+
+
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression  
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import confusion_matrix, accuracy_score
+
+df = pd.read_csv('datasets/Social_Network_Ads.csv')
+
+Features = df.drop(['User ID', 'Purchased', 'Gender'], axis=1)
+Target = df['Purchased']
+
+x_train, x_test, y_train, y_test = train_test_split(Features, Target, test_size=0.25, random_state=0)
+
+#Feature Scaling
+
+sc = StandardScaler()
+x_train = sc.fit_transform(x_train)
+x_test = sc.transform(x_test)
+
+LR = LogisticRegression(random_state=0)
+LR.fit(x_train, y_train)
+
+y_test_pred = LR.predict(x_test)
+
+score = accuracy_score(y_test, y_test_pred)
+print(f"Accuracy: {score*100}%")
+
+matrix = confusion_matrix(y_test, y_test_pred)
+print("\nConfusion Matrix:")
+print(matrix)
+
+TN = matrix[0][0]
+FP = matrix[0][1]
+FN = matrix[1][0]
+TP = matrix[1][1]
+
+print('\nMetrics:')
+print('True Positive (TP):', TP)
+print('True Negative (TN):', TN)
+print('False Positive (FP):', FP)
+print('False Negative (FN):', FN)
+
+accuracy = (TP + TN) / (TP + TN + FP + FN)
+error_rate = 1 - accuracy
+precision = TP / (TP + FP) if (TP + FP) != 0 else 0
+recall = TP / (TP + FN) if (TP + FN) != 0 else 0
+
+print(f"Accuracy: {accuracy}")
+print(f"Error Rate: {error_rate}")
+print(f"Precision: {precision}")
+print(f"Recall: {recall}")
+
+________xxx_______
+
+
+6_data_anal3
+
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.naive_bayes import GaussianNB
+from sklearn.preprocessing import LabelEncoder
+from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score
+
+df = pd.read_csv('datasets/Iris.csv')
+
+le = LabelEncoder()
+df['Species'] = le.fit_transform(df['Species'])
+
+X = df[['SepalLengthCm', 'SepalWidthCm', 'PetalLengthCm', 'PetalWidthCm']]
+y = df['Species']
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=1)
+
+model = GaussianNB()
+model.fit(X_train, y_train)
+
+y_pred = model.predict(X_test)
+
+cm = confusion_matrix(y_test, y_pred)
+print("Confusion Matrix:\n", cm)
+
+accuracy = accuracy_score(y_test, y_pred)
+error_rate = 1 - accuracy
+precision = precision_score(y_test, y_pred, average='macro')  
+recall = recall_score(y_test, y_pred, average='macro')
+
+print("\nMetrics:")
+print("Accuracy      :", round(accuracy, 2))
+print("Error Rate    :", round(error_rate, 2))
+print("Precision     :", round(precision, 2))
+print("Recall        :", round(recall, 2))
+
+
+______xxx________
+
+
+7_nltk
+
+
+import nltk
+from nltk.tokenize import sent_tokenize, word_tokenize
+from nltk.corpus import stopwords
+from nltk.stem import PorterStemmer, WordNetLemmatizer
+import re
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+
+nltk.download('punkt')
+nltk.download('stopwords')
+nltk.download('wordnet')
+nltk.download('averaged_perceptron_tagger')
+
+
+text = """India is a vast country with second highest population in the world.
+It has diverse cultures and festivals like Diwali, Holi, and Christmas.
+People celebrate unity in diversity with joy and harmony."""
+
+
+sentences = sent_tokenize(text)
+words = word_tokenize(text)
+print("Sentences:", sentences)
+print("Words:", words)
+
+
+pos_tags = nltk.pos_tag(words)
+print("POS Tags:", pos_tags)
+
+
+stop_words = set(stopwords.words('english'))
+filtered_words = [word for word in words if word.lower() not in stop_words and word.isalpha()]
+print("Filtered Words (No Stopwords):", filtered_words)
+
+
+stemmer = PorterStemmer()
+stemmed_words = [stemmer.stem(word) for word in filtered_words]
+print("Stemmed Words:", stemmed_words)
+
+
+lemmatizer = WordNetLemmatizer()
+processed_sentences = []
+for sentence in sentences:
+    clean_sentence = re.sub('[^a-zA-Z]', ' ', sentence)  # Remove non-alphabetic characters
+    clean_sentence = clean_sentence.lower()  # Lowercase
+    words_in_sentence = clean_sentence.split()
+    lemmatized_sentence = ' '.join([
+        lemmatizer.lemmatize(word) for word in words_in_sentence if word not in stop_words
+    ])
+    processed_sentences.append(lemmatized_sentence)
+print("Processed Corpus (Lemmatized and No Stopwords):", processed_sentences)
+
+
+tfidf_vectorizer = TfidfVectorizer()
+tfidf_matrix = tfidf_vectorizer.fit_transform(processed_sentences).toarray()
+
+print("\nTF-IDF Feature Names:")
+print(tfidf_vectorizer.get_feature_names_out())
+print("\nTF-IDF Matrix:")
+print(tfidf_matrix)
+
+
+_______xxx_________
+
+
+8_data_vis1_titanic
+
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+titanic = sns.load_dataset('titanic')
+
+titanic['fare'] = titanic['fare'].fillna(titanic['fare'].mean())  
+titanic['age'] = titanic['age'].dropna()
+
+plt.figure(figsize=(8, 6))
+sns.histplot(titanic['fare'], bins=30, kde=True)
+plt.title('Distribution of Ticket Fare')
+plt.xlabel('Fare')
+plt.ylabel('Frequency')
+plt.show()
+
+plt.figure(figsize=(8, 6))
+sns.boxplot(x='pclass', y='fare', data=titanic)
+plt.title('Fare Distribution by Passenger Class')
+plt.xlabel('Passenger Class')
+plt.ylabel('Fare')
+plt.show()
+
+plt.figure(figsize=(8, 6))
+sns.histplot(titanic['age'], bins=30, kde=True)
+plt.title('Distribution of Passenger Age')
+plt.xlabel('Age')
+plt.ylabel('Frequency')
+plt.show()
+
+plt.figure(figsize=(8, 6))
+sns.barplot(x='pclass', y='survived', data=titanic)
+plt.title('Survival Rate by Passenger Class')
+plt.xlabel('Passenger Class')
+plt.ylabel('Survival Rate')
+plt.show()
+
+plt.figure(figsize=(8, 6))
+sns.boxplot(x='survived', y='fare', data=titanic)
+plt.title('Fare Distribution by Survival Status')
+plt.xlabel('Survived')
+plt.ylabel('Fare')
+plt.show()
+
+_______xxx________
+
+9_data_vis2_box
+
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+s
+titanic = sns.load_dataset('titanic')
+
+titanic = titanic.dropna(subset=['age'])
+
+plt.figure(figsize=(8, 6))
+sns.boxplot(x='sex', y='age', data=titanic)
+plt.title('Age Distribution by Gender')
+plt.xlabel('Gender')
+plt.ylabel('Age')
+plt.show()
+
+plt.figure(figsize=(8, 6))
+sns.boxplot(x='sex', y='age', data=titanic, hue='survived')
+plt.title('Age Distribution by Gender and Survival Status')
+plt.xlabel('Gender')
+plt.ylabel('Age')
+plt.legend(title='Survived', labels=['Did Not Survive', 'Survived'])
+plt.show()
+
+_______xxx_______
+
+
+10_data_vis3_iris
+
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+iris = sns.load_dataset('iris')
+iris.head()
+
+print("\nFeature Names and Data Types:")
+print(iris.dtypes)
+
+fig, axes = plt.subplots(2, 2, figsize=(10, 10))
+sns.histplot(iris['sepal_length'], kde=True, ax=axes[0, 0])
+sns.histplot(iris['sepal_width'], kde=True, ax=axes[0, 1])
+sns.histplot(iris['petal_length'], kde=True, ax=axes[1, 0])
+sns.histplot(iris['petal_width'], kde=True, ax=axes[1, 1])
+
+fig, axes = plt.subplots(2, 2, figsize=(10, 10))
+sns.boxplot(y='petal_length', x = 'species', data = iris, ax=axes[0, 0])
+sns.boxplot(y='petal_width', x = 'species', data = iris, ax=axes[0, 1])
+sns.boxplot(y='sepal_length', x = 'species', data = iris, ax=axes[1, 0])
+sns.boxplot(y='sepal_width', x = 'species', data = iris, ax=axes[1, 1])
+
+
+
